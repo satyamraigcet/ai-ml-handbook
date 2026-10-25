@@ -7,7 +7,7 @@ const darkCodeTheme = themes.dracula;
 const config = {
   title: 'Pictures First: AI & ML',
   tagline: 'See the picture, then the idea — a visual revision notebook by Satyam Rai',
-  url: 'https://example.org',
+  url: 'https://ai-ml-handbook.vercel.app',
   baseUrl: '/',
   trailingSlash: false,
   onBrokenLinks: 'warn',
