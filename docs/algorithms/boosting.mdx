@@ -1,0 +1,143 @@
+---
+title: Gradient Boosting
+sidebar_label: Gradient Boosting
+hide_title: true
+hide_table_of_contents: true
+slug: /algorithms/boosting
+---
+
+<ChapterHero icon="🚀" title="Gradient Boosting">
+<PlainWords>
+A relay team of small trees. The first tree makes a rough guess, the next tree learns only from its mistakes, the next fixes what’s still wrong, and so on. Together they become one very strong model.
+</PlainWords>
+</ChapterHero>
+
+<AlgoGrid>
+<AlgoCard n="1" title="Definition">
+Gradient Boosting is an <Highlight>ensemble</Highlight> learning algorithm that builds models **sequentially**. Each new model tries to <Highlight>correct the errors</Highlight> made by the previous models.
+
+**Key Concepts:**
+- <Highlight>Weak learners</Highlight> (usually decision trees)
+- <Highlight>Sequential learning</Highlight>
+- Minimizes loss function
+- Gradient Descent Optimization
+</AlgoCard>
+
+<AlgoCard n="2" title="Mathematical equation">
+**Gradient Boosting model:**
+
+`F_M(x) = F₀(x) + ν Σ_{m=1}^{M} h_m(x)`
+
+**Where,**
+- `F₀(x)` = initial model (constant)
+- `h_m(x)` = m<sup>th</sup> weak learner
+- `ν` = learning-rate shrinkage
+- `M` = number of boosting stages
+
+At each step, a new model `h_m(x)` is trained to predict the **negative gradient** of the loss function.
+
+**Objective (Loss Minimization):** Minimize `L(y, F_M(x))`
+</AlgoCard>
+
+<AlgoCard n="3" title="Geometrical interpretation">
+- Gradient boosting moves in the direction of **steepest descent** to minimize the loss.
+- Each new model corrects the residual errors of the previous model.
+- The final model is a strong learner built by additive combination of weak learners.
+</AlgoCard>
+
+<AlgoCard n="4" title="Geometrical interpretation (diagram)" span="2">
+<PlotBoost />
+</AlgoCard>
+
+<AlgoCard n="5" title="When to use">
+- When high predictive accuracy is needed
+- When data has complex patterns
+- For structured / tabular data
+- After missing values are handled (for sklearn GradientBoosting)
+- When overfitting can be controlled using regularization
+
+**Examples:**
+- Click-through rate prediction
+- Fraud detection
+- Customer churn prediction
+- Demand forecasting
+</AlgoCard>
+
+<AlgoCard n="6" title="Code implementation (Python · scikit-learn)" span="wide">
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import accuracy_score
+
+# Sample teaching dataset (balanced binary classes)
+X = [[1, 2], [2, 1], [2, 3], [3, 2], [3, 3],
+     [3, 4], [4, 3], [4, 5], [5, 4],
+     [6, 7], [7, 6], [7, 8], [8, 7],
+     [8, 9], [9, 8], [9, 10], [10, 9]]
+y = [0, 0, 0, 0, 0, 0, 0, 0,
+     1, 1, 1, 1, 1, 1, 1, 1]
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y)
+
+# Model
+model = GradientBoostingClassifier(
+    n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+
+# Train
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+# Accuracy
+print("Accuracy:", accuracy_score(y_test, y_pred))
+```
+</AlgoCard>
+
+<AlgoCard n="7" title="Assumptions">
+- The relationship between features and target can be learned iteratively
+- Errors of previous models can be corrected by new models
+- Data is representative of the problem
+- Requires enough data for learning meaningful patterns
+</AlgoCard>
+
+<AlgoCard n="8" title="Advantages">
+- ✓ High predictive performance
+- ✓ Handles complex relationships
+- ✓ Works with different loss functions
+- ✓ Can generalize well with careful tuning
+- ✓ Feature importance available
+</AlgoCard>
+
+<AlgoCard n="9" title="Disadvantages">
+- ✗ Sensitive to hyperparameters
+- ✗ Training time can be high
+- ✗ Can overfit if not tuned
+- ✗ Not ideal for very large datasets
+- ✗ Harder to interpret than simple models
+</AlgoCard>
+
+<AlgoCard n="10" title="Hyperparameters" span="2">
+| Hyperparameter | Meaning |
+| --- | --- |
+| `n_estimators` | number of boosting stages |
+| `learning_rate` | shrinks contribution of each tree |
+| `max_depth` | maximum depth of trees |
+| `subsample` | fraction of samples used for training each tree |
+| `loss` | loss function (e.g. `log_loss`, `squared_error`) |
+| `min_samples_split` | minimum samples required to split an internal node |
+</AlgoCard>
+
+<AlgoCard n="11" title="Real-world applications">
+<AppGrid items={[
+  {icon: '✉', label: 'Email Spam Detection'},
+  {icon: '🛒', label: 'E-commerce Demand Prediction'},
+  {icon: '💳', label: 'Credit Risk Assessment'},
+  {icon: '🩺', label: 'Clinical Decision Support'},
+  {icon: '📈', label: 'Forecasting Signals'},
+  {icon: '🛡', label: 'Fraud Risk Detection'},
+]} />
+</AlgoCard>
+</AlgoGrid>

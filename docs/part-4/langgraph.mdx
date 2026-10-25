@@ -1,0 +1,109 @@
+---
+title: LangGraph
+sidebar_label: LangGraph
+slug: /parts/part-4/langgraph
+---
+
+**Graph flow · LangGraph — state, loops, and a decision**
+
+<LoopStrip steps={['User question', 'Start', 'Plan', 'Need a tool?', 'Use tool / update state', 'Generate']} />
+
+- You design the workflow as nodes and edges.
+- State, loops, conditional logic, and retries are ordinary parts of the graph.
+- The right shape for a complex multi-step agent; you keep full control of the flow and shared state.
+- Built on top of LangChain; it uses LangChain components.
+
+| | LangChain | LangGraph |
+| --- | --- | --- |
+| Job | Build simple LLM applications from ready parts. | Build <Highlight>stateful, multi-step AI workflows</Highlight>. |
+| Shape | A line: prompt → model → tool → answer. | A graph: nodes, edges, conditions, loops. |
+| State | Short memory on a straight chain. | <Highlight>Shared state you update at every node</Highlight>. |
+| Control | Fast to start; the route is mostly fixed. | You own the route, including when to stop. |
+| Relation | The components: models, prompts, tools, retrievers. | Uses those components, and decides the order. |
+
+### Worked example · plan → tool? → answer
+
+Someone asks for a weather fact. The graph’s job is to **decide** whether a tool is needed, call it when yes, then write the final reply from shared state.
+
+```python
+# pip install langgraph langchain-openai
+# export OPENAI_API_KEY=...
+
+from typing import Annotated, Literal, TypedDict
+import operator
+
+from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage, ToolMessage
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+from langgraph.graph import END, START, StateGraph
+
+
+@tool
+def get_weather(city: str) -> str:
+    """Return a short weather note for a city. Use when the user asks about weather."""
+    # Stand-in for a real weather API
+    return f"In {city} it is 31°C with light rain."
+
+
+tools = [get_weather]
+tools_by_name = {t.name: t for t in tools}
+llm = ChatOpenAI(model="gpt-4o-mini").bind_tools(tools)
+
+
+class State(TypedDict):
+    # Append-only message list — each node adds, nothing overwrites the history
+    messages: Annotated[list[AnyMessage], operator.add]
+
+
+def plan(state: State) -> dict:
+    """LLM node: may request a tool, or write the final answer."""
+    system = SystemMessage(content="Use tools for live facts. Keep answers short.")
+    reply = llm.invoke([system] + state["messages"])
+    return {"messages": [reply]}
+
+
+def use_tool(state: State) -> dict:
+    """Tool node: run every tool call the model requested."""
+    results = []
+    for call in state["messages"][-1].tool_calls:
+        out = tools_by_name[call["name"]].invoke(call["args"])
+        results.append(ToolMessage(content=str(out), tool_call_id=call["id"]))
+    return {"messages": results}
+
+
+def need_tool(state: State) -> Literal["use_tool", "__end__"]:
+    """Conditional edge: loop back to tools, or stop."""
+    if state["messages"][-1].tool_calls:
+        return "use_tool"
+    return "__end__"
+
+
+graph = StateGraph(State)
+graph.add_node("plan", plan)
+graph.add_node("use_tool", use_tool)
+graph.add_edge(START, "plan")
+graph.add_conditional_edges("plan", need_tool, ["use_tool", END])
+graph.add_edge("use_tool", "plan")  # after the tool, plan again
+app = graph.compile()
+
+result = app.invoke({
+    "messages": [HumanMessage(content="What's the weather in Nagpur today?")],
+})
+print(result["messages"][-1].content)
+# → e.g. "Nagpur is about 31°C with light rain today."
+```
+
+What happens under the hood:
+
+1. **Start → plan** — the model sees the question and may emit a tool call.
+2. **Need a tool?** — if yes, route to `use_tool`; if no, end.
+3. **use_tool → plan** — tool results join the shared `messages` state; the model writes again.
+4. **Stop** — when the last plan has no tool calls, the graph ends.
+
+That is the same loop the chapter diagram shows: plan, decide, act, update state, plan again.
+
+<QAItem q="When is a chain enough, and when do you want a graph?">
+A chain fits a straight path: prompt, model, maybe one tool, then an answer. A graph fits a workflow that must branch, loop, retry, and carry shared state, such as “need a tool?” followed by an update and a return to the plan.
+</QAItem>
+
+**In one line:** LangGraph decides the <Highlight>route</Highlight> — nodes, edges, and shared state — so a multi-step agent can loop without losing the thread.

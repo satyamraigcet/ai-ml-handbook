@@ -1,0 +1,145 @@
+---
+title: Naive Bayes
+sidebar_label: Naive Bayes
+hide_title: true
+hide_table_of_contents: true
+slug: /algorithms/naive-bayes
+---
+
+<ChapterHero icon="🎲" title="Naive Bayes">
+<PlainWords>
+If an email has the words “free”, “winner” and “prize”, how likely is it spam? Naive Bayes multiplies the chance of each word appearing in spam and picks the most likely class. It is “naive” because it pretends the words don’t affect each other.
+</PlainWords>
+</ChapterHero>
+Naive Bayes is a <Highlight>supervised</Highlight> machine learning algorithm based on Bayes’ Theorem used for:
+
+- Classification
+- Probabilistic Prediction
+
+<DashBox>
+It predicts the class of data using probability and prior knowledge.
+</DashBox>
+
+<AlgoGrid>
+<AlgoCard n="1" title="Definition">
+Naive Bayes is a probabilistic classification algorithm that assumes all input features are <Highlight>independent</Highlight> of each other.
+
+**Key Concepts:**
+- Bayes Theorem
+- Prior Probability
+- Posterior Probability
+- Likelihood
+- Feature Independence Assumption
+
+It is called “Naive” because it assumes features are independent.
+</AlgoCard>
+
+<AlgoCard n="2" title="Mathematical equation">
+**Bayes Theorem**
+
+`P(A|B) = (P(B|A) · P(A)) / P(B)`
+
+**Naive Bayes Formula**
+
+`P(C|X) = (P(X|C) · P(C)) / P(X)`
+
+Where:  
+`P(C|X)` = Posterior · `P(X|C)` = Likelihood · `P(C)` = Prior · `P(X)` = Evidence
+</AlgoCard>
+
+<AlgoCard n="3" title="Geometrical interpretation">
+- Calculates class probabilities from features
+- Assigns the class with the highest posterior
+- Fast probabilistic classification
+- Effective for text data
+
+**Types:** Gaussian · Multinomial · Bernoulli
+</AlgoCard>
+
+<AlgoCard n="4" title="Geometrical interpretation (diagram)" span="2">
+<PlotNaive />
+<DashBox>
+The class having the <Highlight>highest posterior probability</Highlight> is selected.
+</DashBox>
+</AlgoCard>
+
+<AlgoCard n="5" title="When to use">
+- Dataset is high-dimensional
+- Text classification required
+- Fast prediction needed
+- Features are roughly independent
+
+**Examples:**
+- Spam filtering
+- Sentiment analysis
+- Document classification
+- Recommendation systems
+</AlgoCard>
+
+<AlgoCard n="6" title="Code implementation (Python · scikit-learn)" span="wide">
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+
+# Sample teaching dataset (balanced binary classes)
+X = [[1, 2], [2, 1], [2, 3], [3, 2],
+     [3, 4], [4, 3], [4, 5], [5, 4],
+     [6, 7], [7, 6], [7, 8], [8, 7],
+     [8, 9], [9, 8], [9, 10], [10, 9]]
+y = [0, 0, 0, 0, 0, 0, 0, 0,
+     1, 1, 1, 1, 1, 1, 1, 1]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y)
+
+model = GaussianNB()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+```
+</AlgoCard>
+
+<AlgoCard n="7" title="Assumptions">
+- Features are independent
+- All relevant features are included
+- No strong correlation between features
+- Data distribution matches model assumptions
+</AlgoCard>
+
+<AlgoCard n="8" title="Advantages">
+- ✓ Simple and fast
+- ✓ Works well with high-dimensional data
+- ✓ Performs well on small datasets
+- ✓ Excellent for text classification
+- ✓ Requires less training data
+</AlgoCard>
+
+<AlgoCard n="9" title="Disadvantages">
+- ✗ Strong independence assumption
+- ✗ Sensitive to correlated features
+- ✗ Probability estimates may be inaccurate
+- ✗ Zero-frequency problem can occur
+- ✗ Less effective for complex relationships
+</AlgoCard>
+
+<AlgoCard n="10" title="Hyperparameters" span="2">
+| Hyperparameter | Meaning |
+| --- | --- |
+| `var_smoothing` | stability for GaussianNB |
+| `alpha` | smoothing parameter |
+| `fit_prior` | whether to learn class priors |
+| `class_prior` | prior probabilities |
+</AlgoCard>
+
+<AlgoCard n="11" title="Real-world applications">
+<AppGrid items={[
+  {icon: '✉', label: 'Spam Email Detection'},
+  {icon: '☺', label: 'Sentiment Analysis'},
+  {icon: '📰', label: 'News Classification'},
+  {icon: '🛒', label: 'Recommendation Systems'},
+  {icon: '🩺', label: 'Medical Diagnosis'},
+  {icon: '🛡', label: 'Fraud Detection'},
+]} />
+</AlgoCard>
+</AlgoGrid>

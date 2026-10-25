@@ -1,0 +1,151 @@
+---
+title: Decision Tree
+sidebar_label: Decision Tree
+hide_title: true
+hide_table_of_contents: true
+slug: /algorithms/tree
+---
+
+<ChapterHero icon="🌳" title="Decision Tree">
+<PlainWords>
+A game of 20 questions. Ask the most useful yes/no question first, then keep asking until the answer is obvious. Each leaf at the bottom is a final decision.
+</PlainWords>
+</ChapterHero>
+Decision Tree is a <Highlight>supervised</Highlight> algorithm for classification and regression.
+
+<DashBox>
+Internal nodes = feature tests · branches = outcomes · leaf nodes = final prediction.
+</DashBox>
+
+<AlgoGrid>
+<AlgoCard n="1" title="Definition">
+A Decision Tree is a <Highlight>supervised</Highlight> machine learning algorithm used for both **classification** and **regression**.
+
+It works like a <Highlight>tree structure where decisions are made based on conditions</Highlight>.
+
+**Key Concepts:**
+- Internal Nodes → feature tests
+- Branches → outcomes of tests
+- Leaf Nodes → final prediction / output
+
+It mimics human decision-making.
+</AlgoCard>
+
+<AlgoCard n="2" title="Mathematical equation">
+**Entropy Formula**
+
+`Entropy(S) = − Σ pᵢ log₂(pᵢ)`
+
+**Information Gain**
+
+`IG(S, A) = Entropy(S) − Σ (|Sᵥ|/|S|) Entropy(Sᵥ)`
+
+**Gini Index**
+
+`Gini = 1 − Σ pᵢ²`
+
+**Where,**
+- `pᵢ` = probability of class i
+- Entropy measures impurity
+- Information Gain measures reduction in impurity
+</AlgoCard>
+
+<AlgoCard n="3" title="Geometrical interpretation">
+- Decision Trees divide feature space into **rectangular regions**.
+- Each split creates a decision boundary.
+- Final regions correspond to predicted classes / values.
+</AlgoCard>
+
+<AlgoCard n="4" title="Geometrical interpretation (diagram)" span="2">
+<PlotTree />
+</AlgoCard>
+
+<AlgoCard n="5" title="When to use">
+- Need interpretable rules
+- Data contains non-linear relationships
+- Numerical data or appropriately encoded categorical data exists
+- Feature importance is required
+
+**Examples:**
+- Loan approval systems
+- Medical diagnosis
+- Customer segmentation
+- Fraud detection
+</AlgoCard>
+
+<AlgoCard n="6" title="Code implementation (Python · scikit-learn)" span="wide">
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+
+# Sample teaching dataset (balanced binary classes)
+X = [[1, 2], [2, 1], [2, 3], [3, 2], [3, 3],
+     [3, 4], [4, 3], [4, 5], [5, 4],
+     [6, 7], [7, 6], [7, 8], [8, 7],
+     [8, 9], [9, 8], [9, 10], [10, 9]]
+y = [0, 0, 0, 0, 0, 0, 0, 0,
+     1, 1, 1, 1, 1, 1, 1, 1]
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y)
+
+# Model
+model = DecisionTreeClassifier(max_depth=3, random_state=42)
+
+# Train
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+# Accuracy
+print("Accuracy:", accuracy_score(y_test, y_pred))
+```
+</AlgoCard>
+
+<AlgoCard n="7" title="Assumptions">
+- No assumptions about data distribution
+- Works with non-linear relationships
+- Features should meaningfully split data
+- Large trees may overfit (use pruning / depth limits)
+</AlgoCard>
+
+<AlgoCard n="8" title="Advantages">
+- ✓ Easy to understand and visualize
+- ✓ Handles non-linear data
+- ✓ Can model encoded categorical and numerical features
+- ✓ No feature scaling required
+- ✓ Feature importance available
+</AlgoCard>
+
+<AlgoCard n="9" title="Disadvantages">
+- ✗ Overfitting problem
+- ✗ Unstable with small data changes
+- ✗ Can become very complex
+- ✗ Biased toward dominant classes
+- ✗ Weaker alone than ensembles
+</AlgoCard>
+
+<AlgoCard n="10" title="Hyperparameters" span="2">
+| Hyperparameter | Meaning |
+| --- | --- |
+| `criterion` | impurity measure (`gini` or `entropy`) |
+| `max_depth` | maximum depth of the tree |
+| `min_samples_split` | minimum samples required to split an internal node |
+| `min_samples_leaf` | minimum samples required at a leaf node |
+| `max_features` | number of features considered when looking for the best split |
+</AlgoCard>
+
+<AlgoCard n="11" title="Real-world applications">
+<AppGrid items={[
+  {icon: '🏦', label: 'Loan Approval'},
+  {icon: '🩺', label: 'Disease Diagnosis'},
+  {icon: '📦', label: 'Customer Segmentation'},
+  {icon: '🛡', label: 'Fraud Detection'},
+  {icon: '🌱', label: 'Agriculture Decision Systems'},
+  {icon: '🏭', label: 'Fault Diagnosis'},
+]} />
+</AlgoCard>
+</AlgoGrid>

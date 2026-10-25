@@ -1,0 +1,159 @@
+---
+title: Random Forest
+sidebar_label: Random Forest
+hide_title: true
+hide_table_of_contents: true
+slug: /algorithms/forest
+---
+
+<ChapterHero icon="🌲" title="Random Forest">
+<PlainWords>
+Ask 100 slightly different decision trees the same question and <Highlight>go with the crowd</Highlight>. One tree can make silly mistakes, but a whole forest rarely makes the same mistake together.
+</PlainWords>
+</ChapterHero>
+
+<AlgoGrid>
+<AlgoCard n="1" title="Definition">
+Random Forest is an <Highlight>ensemble</Highlight> machine learning algorithm that combines **multiple decision trees** to improve prediction accuracy and reduce overfitting.
+
+- Classification → **Majority Voting**
+- Regression → **Average Prediction**
+
+**It uses:**
+- <Highlight>Bagging</Highlight> (Bootstrap Sampling)
+- <Highlight>Random Feature Selection</Highlight>
+</AlgoCard>
+
+<AlgoCard n="2" title="Mathematical equation">
+**Classification (Voting)**
+
+`ŷ = mode(T₁(x), T₂(x), …, Tₙ(x))`
+
+**Regression (Averaging)**
+
+`ŷ = (1/n) Σᵢ₌₁ⁿ Tᵢ(x)`
+
+**Where,**
+- `Tᵢ(x)` = prediction from i<sup>th</sup> tree
+- `n` = total number of trees
+- `mode()` = majority voting
+</AlgoCard>
+
+<AlgoCard n="3" title="Geometrical interpretation">
+- Multiple decision trees create multiple decision boundaries.
+- Final prediction is based on combined boundaries.
+- Produces **smoother and more generalized** regions than a single tree.
+
+Each tree learns differently from random subsets of data / features. The ensemble combines all tree decisions.
+</AlgoCard>
+
+<AlgoCard n="4" title="Geometrical interpretation (diagram)" span="2">
+<PlotForest />
+</AlgoCard>
+
+<AlgoCard n="5" title="When to use">
+- Need a strong tabular-data baseline
+- Data contains non-linear relationships
+- A single Decision Tree overfits
+- Feature importance is needed
+- Training cost is acceptable
+
+**Examples:**
+- Fraud-risk support
+- Clinical decision support
+- Recommendation ranking
+- Demand forecasting
+</AlgoCard>
+
+<AlgoCard n="6" title="Code implementation (Python · scikit-learn)" span="wide">
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Sample teaching dataset (balanced binary classes)
+X = [[1, 2], [2, 1], [2, 3], [3, 2], [3, 3],
+     [3, 4], [4, 3], [4, 5], [5, 4],
+     [6, 7], [7, 6], [7, 8], [8, 7],
+     [8, 9], [9, 8], [9, 10], [10, 9]]
+y = [0, 0, 0, 0, 0, 0, 0, 0,
+     1, 1, 1, 1, 1, 1, 1, 1]
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y)
+
+# Model
+model = RandomForestClassifier(n_estimators=100,
+                               random_state=42)
+
+# Train
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+# Accuracy
+print("Accuracy:", accuracy_score(y_test, y_pred))
+```
+</AlgoCard>
+
+<AlgoCard n="7" title="Assumptions">
+- No strict assumptions about data distribution
+- Trees should be diverse
+- Enough trees improve stability
+- Independent observations preferred
+</AlgoCard>
+
+<AlgoCard n="8" title="Advantages">
+- ✓ Often strong predictive performance
+- ✓ Reduces variance versus a single tree
+- ✓ Handles non-linear data
+- ✓ Works with many tabular datasets
+- ✓ Feature importance available
+- ✓ Some current implementations support missing values; verify the estimator and version
+</AlgoCard>
+
+<AlgoCard n="9" title="Disadvantages">
+- ✗ Slower than Decision Trees
+- ✗ More memory consumption
+- ✗ Less interpretable
+- ✗ Large models can become computationally expensive
+</AlgoCard>
+
+<AlgoCard n="10" title="Hyperparameters" span="2">
+| Hyperparameter | Meaning |
+| --- | --- |
+| `n_estimators` | Number of trees in the forest |
+| `max_depth` | Maximum depth of the trees |
+| `min_samples_split` | Minimum samples required to split an internal node |
+| `min_samples_leaf` | Minimum samples required at a leaf node |
+| `max_features` | Number of features considered at each split |
+| `bootstrap` | Whether bootstrap sampling (with replacement) is used |
+</AlgoCard>
+
+<AlgoCard n="11" title="Real-world applications">
+<AppGrid items={[
+  {icon: '💳', label: 'Credit Card Fraud Risk'},
+  {icon: '➕', label: 'Clinical Decision Support'},
+  {icon: '📈', label: 'Financial Risk Signals'},
+  {icon: '🛒', label: 'Recommendation Systems'},
+  {icon: '🌱', label: 'Agriculture Yield Estimation'},
+  {icon: '🚗', label: 'Sensor-data Classification'},
+]} />
+</AlgoCard>
+</AlgoGrid>
+
+### How does Random Forest work?
+
+<LoopStrip
+  title="How does Random Forest work?"
+  steps={[
+    {label: 'Training Dataset'},
+    {label: 'Bootstrap sampling'},
+    {label: 'Sample 1 … Sample n'},
+    {label: 'Predictions from all trees'},
+    {label: 'Majority Voting (classification) or Average (regression)'},
+    {label: 'Final Prediction'},
+  ]}
+/>

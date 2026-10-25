@@ -1,0 +1,86 @@
+---
+title: LangChain
+sidebar_label: LangChain
+slug: /parts/part-4/langchain
+---
+
+> The model writes. LangChain supplies the ports.
+
+<LoopStrip steps={['User', 'Agent or LLM', 'LangChain', 'Tools or retriever', 'Result']} />
+
+LangChain is a <Highlight>framework and ecosystem</Highlight> for LLM applications. Ordinary code can call a model, a database, and a function. These names are one popular way to organise that work.
+
+| Shelf | What it holds |
+| --- | --- |
+| Models | The same application shape can call OpenAI, Gemini, Anthropic, Hugging Face, or another provider. |
+| Data and tools | Loaders, splitters, embeddings, retrievers, calculators, search, and other APIs snap in as components. |
+| Workflows | Chains, agents, and memory. A chain is a <Highlight>straight path</Highlight>. An agent may choose a tool and try again. |
+
+**Simple flow · a straight line:** `User question → Prompt template → LLM → Tools → Final answer`
+
+A chain fits a path that does not need to branch. LangGraph is the same pieces as a graph when the work must loop.
+
+### Worked example · a one-line chain (LCEL)
+
+Someone asks for a one-sentence explanation of a topic. LangChain’s job is to fill a prompt template, call the model, and return plain text.
+
+```python
+# pip install langchain-core langchain-openai
+# export OPENAI_API_KEY=...
+
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_openai import ChatOpenAI
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Explain AI topics to beginners in plain words."),
+    ("human", "Explain {topic} in one short sentence."),
+])
+
+# The pipe (|) is LCEL: prompt → model → string parser
+chain = prompt | ChatOpenAI(model="gpt-4o-mini") | StrOutputParser()
+
+answer = chain.invoke({"topic": "vector databases"})
+print(answer)
+# → e.g. "A vector database stores embeddings so you can search by meaning."
+```
+
+What happens under the hood:
+
+1. **Prompt** — `{topic}` becomes a concrete message.
+2. **Model** — the chat model returns a reply.
+3. **Parser** — `StrOutputParser` keeps only the text (no message wrapper).
+
+### Worked example · prompt + tool (calculator)
+
+When the model must not invent a number, attach a tool. The chain still looks like a line; the model may call the tool before it writes the final answer.
+
+```python
+# pip install langchain langchain-openai
+
+from langchain.agents import create_agent
+
+def multiply(a: float, b: float) -> float:
+    """Multiply two numbers. Use for exact arithmetic."""
+    return a * b
+
+agent = create_agent(
+    model="openai:gpt-4o-mini",
+    tools=[multiply],
+    system_prompt="Use tools for exact arithmetic. Do not invent numbers.",
+)
+
+result = agent.invoke({
+    "messages": [{"role": "user", "content": "What is 17.5 times 4?"}],
+})
+print(result["messages"][-1].content)
+# → e.g. "70"  (from the tool, not a guess)
+```
+
+Swap the model by changing the string (`openai:…`, `anthropic:…`, …). The prompt and tool stay the same shape.
+
+<QAItem q="When is a chain enough, and when do you want a graph?">
+A chain fits a straight path: prompt, model, maybe one tool, then an answer. A graph fits a workflow that must branch, loop, retry, and carry shared state, such as “need a tool?” followed by an update and a return to the plan.
+</QAItem>
+
+**In one line:** LangChain supplies the <Highlight>ports and pieces</Highlight> — prompts, models, tools, parsers — so a straight application path does not start from a blank file.

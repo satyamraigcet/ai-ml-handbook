@@ -1,0 +1,123 @@
+---
+title: LangSmith
+sidebar_label: LangSmith
+slug: /parts/part-4/langsmith
+description: LangSmith — tracing, evaluation, and debugging for LLM runs.
+---
+
+**In plain words:** LangSmith is the <Highlight>record of a run</Highlight>. It captures prompts, model replies, tool calls, timings, and token use so you can debug and evaluate without guessing from a single printed string.
+
+> The model writes. LangSmith keeps the receipt.
+
+<LoopStrip steps={['Your app', 'Trace', 'LangSmith', 'Inspect / score', 'Fix prompt or tool']} />
+
+| Shelf | What it holds |
+| --- | --- |
+| Tracing | Every step of a chain, graph, or plain OpenAI call — inputs, outputs, latency. |
+| Debugging | See which tool ran, what the retriever returned, and where a run failed. |
+| Evaluation | Datasets of examples and scores so a new prompt can be compared with last week’s. |
+| Monitoring | Cost, latency, and quality signals once the app is live. |
+
+In the optional stack from Chapter 13: **LangChain** supplies integrations, **LangGraph** decides the route, **LangSmith** traces and evaluates the run. None of these layers is required.
+
+### Worked example · trace a small support bot
+
+Someone asks a product question. Your code retrieves a short note, then calls the model. LangSmith’s job is to show **both** steps in one nested trace.
+
+```python
+# pip install langsmith openai
+# export LANGSMITH_TRACING=true
+# export LANGSMITH_API_KEY=ls_...
+# export OPENAI_API_KEY=...
+# optional: export LANGSMITH_PROJECT=handbook-demo
+
+from openai import OpenAI
+from langsmith import traceable
+from langsmith.wrappers import wrap_openai
+
+client = wrap_openai(OpenAI())  # every chat call is logged
+
+NOTES = [
+    "Starter plans are limited to 5 users.",
+    "Enterprise plans support unlimited users.",
+    "API rate limit on Starter is 1,000 requests per hour.",
+]
+
+
+@traceable(run_type="retriever", name="lookup_notes")
+def lookup_notes(question: str) -> str:
+    # Stand-in for a vector search — returns grounded text
+    return "\n".join(NOTES)
+
+
+@traceable(name="support_bot")
+def support_bot(question: str) -> str:
+    context = lookup_notes(question)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "Answer using only the notes below. "
+                    "If the notes do not say, say you do not know.\n\n"
+                    + context
+                ),
+            },
+            {"role": "user", "content": question},
+        ],
+    )
+    return response.choices[0].message.content
+
+
+print(support_bot("How many users can I have on the Starter plan?"))
+# → e.g. "On the Starter plan you can have up to 5 users."
+# Open LangSmith → project → this run: support_bot → lookup_notes + ChatOpenAI
+```
+
+What you get in the UI:
+
+1. **Outer span** — `support_bot` with the user question.
+2. **Child span** — `lookup_notes` with the retrieved text.
+3. **Model span** — the exact prompt and completion, plus latency and tokens.
+
+### Worked example · LangChain chain with tracing on
+
+If you already use LangChain, turn tracing on with environment variables. No wrapper change is required for ordinary chains and graphs.
+
+```python
+# pip install langchain-core langchain-openai langsmith
+# export LANGSMITH_TRACING=true
+# export LANGSMITH_API_KEY=ls_...
+# export OPENAI_API_KEY=...
+
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_openai import ChatOpenAI
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Answer in one short sentence."),
+    ("human", "{question}"),
+])
+chain = prompt | ChatOpenAI(model="gpt-4o-mini") | StrOutputParser()
+
+print(chain.invoke({"question": "What is RAG in one line?"}))
+# → The run appears in LangSmith automatically while LANGSMITH_TRACING=true.
+```
+
+### Habits that keep traces useful
+
+- Name projects (`LANGSMITH_PROJECT`) so demos do not mix with production.
+- Trace **retrieval and tools**, not only the final model call — wrong context is the usual failure.
+- Keep secrets out of prompts and logged arguments; redact before shipping traces.
+- Score a fixed dataset when you change a prompt — a nicer reply is not proof of a better system.
+
+<QAItem q="Do I need LangSmith to use LangChain or LangGraph?">
+No. LangSmith is optional observability. Chains and graphs run without it. Turn tracing on when you need to inspect, compare, or evaluate runs.
+</QAItem>
+
+<QAItem q="What is the difference between tracing and evaluation?">
+Tracing records what one run did. Evaluation scores many runs against examples (or a judge) so you can compare prompts, models, or retrieval settings over time.
+</QAItem>
+
+**In one line:** LangSmith keeps the <Highlight>receipt of each run</Highlight> so you can see prompts, tools, latency, and scores instead of debugging from a single print.

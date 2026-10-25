@@ -1,0 +1,42 @@
+---
+title: MCP
+sidebar_label: MCP
+slug: /parts/part-4/mcp
+---
+
+**In plain words:** MCP <Highlight>opens the doors</Highlight>. LangChain helps build the house. The weather service, the drive, and the database stay where they are; the assistant knocks in a standard way.
+
+<PlotDoorsVsHouse />
+
+<LoopStrip steps={['User', 'Host', 'Model', 'MCP client', 'MCP server', 'Business system']} />
+
+| | MCP | LangChain |
+| --- | --- | --- |
+| What it is | A <Highlight>standard protocol</Highlight> for connecting AI apps to external tools and data. | A development framework for building AI application components. |
+| Picture | A common language. **The doors.** | A toolbox. **The house.** |
+
+**Stdout rule for a local server:** protocol messages on stdout; diagnostic logs on stderr.
+
+<QAItem q="What does MCP do that LangChain does not?">
+MCP is the standard connection to tools, resources, and prompts. LangChain composes the application: models, retrieval, tools, and the order of steps. Together, MCP opens the door and LangChain decides what to do with what comes back.
+</QAItem>
+
+<QAItem q="Why are host and client separate ideas?">
+The host owns the user experience, model, permissions, and combined context. A client is one protocol connection inside that host, normally to one MCP server. One host can therefore manage several isolated server sessions.
+</QAItem>
+
+<QAItem q="When should something be a resource instead of a tool?">
+Use a resource when the main operation is to identify and read content, such as a file or notebook. Use a tool for a bounded action or computation. Do not disguise a dangerous write as a resource read.
+</QAItem>
+
+<QAItem q="Does a successful MCP connection authorize every capability?">
+No. Discovery says a capability exists. The host decides whether to expose or request it, and the server must authorize the actual user and operation when the request arrives.
+</QAItem>
+
+<QAItem q="What is the important stdout rule for a local server?">
+Stdout carries protocol messages. Send diagnostic logs to stderr. Unframed log text on stdout can break the JSON-RPC stream.
+</QAItem>
+
+<QAItem q="Why can a read-only resource still be risky?">
+It may reveal sensitive data or contain prompt injection that influences later model behaviour. Access control, content boundaries, and treatment as untrusted data still matter.
+</QAItem>

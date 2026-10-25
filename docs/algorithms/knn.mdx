@@ -1,0 +1,167 @@
+---
+title: K-Nearest Neighbors (KNN)
+sidebar_label: K-Nearest Neighbors (KNN)
+hide_title: true
+hide_table_of_contents: true
+slug: /algorithms/knn
+---
+
+<ChapterHero icon="📌" title="K-Nearest Neighbors (KNN)">
+<PlainWords>
+“Tell me who your neighbours are and I’ll tell you who you are.” To label a new point, look at the <Highlight>K closest known points</Highlight> and copy the most common label. For regression, average their values.
+</PlainWords>
+</ChapterHero>
+K-Nearest Neighbors is a <Highlight>supervised</Highlight> machine learning algorithm used for:
+
+- Classification
+- Regression
+
+<DashBox>
+It predicts the output based on the nearest data points in the dataset.
+</DashBox>
+
+<AlgoGrid>
+<AlgoCard n="1" title="Definition">
+KNN is a <Highlight>non-parametric</Highlight> and <Highlight>instance-based</Highlight> learning algorithm that classifies a new data point based on the <Highlight>majority class among its nearest neighbors</Highlight>.
+
+**Key Concepts:**
+- **K** → number of nearest neighbors
+- **Distance Metric** → measures similarity
+- **Majority Voting** → for classification
+- **Averaging** → for regression
+
+<DashBox>
+KNN stores all training data and makes predictions during testing.
+</DashBox>
+</AlgoCard>
+
+<AlgoCard n="2" title="Mathematical equation">
+**Euclidean Distance Formula**
+
+`d(x, y) = √ Σᵢ₌₁ⁿ (xᵢ − yᵢ)²`
+
+**Manhattan Distance Formula**
+
+`d(x, y) = Σᵢ₌₁ⁿ |xᵢ − yᵢ|`
+
+**Classification Rule**
+
+Predict the class with the highest frequency among K nearest neighbors.
+
+**Where,**
+- `xᵢ` = feature value of point x
+- `yᵢ` = feature value of point y
+- `n` = number of features
+</AlgoCard>
+
+<AlgoCard n="3" title="Geometrical interpretation">
+- KNN finds the nearest points in feature space.
+- Distance determines similarity.
+- Nearby points likely belong to the same class.
+- Decision boundary depends on K value.
+
+**Types of Distance Metrics:**
+- Euclidean Distance
+- Manhattan Distance
+- Minkowski Distance
+- Hamming Distance
+
+**Behavior:**
+- Small K → sensitive to noise
+- Large K → smoother boundary
+</AlgoCard>
+
+<AlgoCard n="4" title="Geometrical interpretation (diagram)" span="2">
+<PlotKnn />
+
+Class 0 (o) · Class 1 (x). With K=3 the inner circle decides; with K=7 the larger circle votes.
+</AlgoCard>
+
+<AlgoCard n="5" title="When to use">
+- Dataset is small to medium-sized
+- Data has clear patterns
+- Non-linear decision boundaries exist
+- Fast training is needed
+- Recommendation systems are used
+
+**Examples:**
+- Recommendation systems
+- Pattern recognition
+- Image classification
+- Medical diagnosis
+</AlgoCard>
+
+<AlgoCard n="6" title="Code implementation (Python · scikit-learn)" span="wide">
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+# Sample teaching dataset (balanced bits)
+X = [[1, 2], [2, 3], [3, 1], [4, 3], [3, 4], [4, 5], [4, 8], [5, 4],
+     [6, 7], [7, 6], [7, 9], [8, 7], [8, 9], [9, 8], [9, 11], [10, 8]]
+y = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42)
+
+# Model
+model = KNeighborsClassifier(n_neighbors=3)
+
+# Train
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+# Accuracy
+print("Accuracy:", accuracy_score(y_test, y_pred))
+```
+</AlgoCard>
+
+<AlgoCard n="7" title="Assumptions">
+- Similar data points exist near each other
+- Data is properly scaled
+- Noise is limited
+- Meaningful distance metric is chosen
+</AlgoCard>
+
+<AlgoCard n="8" title="Advantages">
+- ✓ Simple and easy to understand
+- ✓ Minimal fitting computation
+- ✓ Handles non-linear data
+- ✓ Works for multi-class problems
+- ✓ Flexible distance metrics
+</AlgoCard>
+
+<AlgoCard n="9" title="Disadvantages">
+- ✗ Slow prediction time
+- ✗ Memory intensive
+- ✗ Sensitive to irrelevant features
+- ✗ Sensitive to scaling
+- ✗ Performance decreases with large datasets
+</AlgoCard>
+
+<AlgoCard n="10" title="Hyperparameters" span="2">
+| Hyperparameter | Meaning |
+| --- | --- |
+| `n_neighbors` | number of neighbors |
+| `weights` | uniform or distance |
+| `metric` | distance metric |
+| `p` | power parameter for Minkowski distance |
+| `algorithm` | auto, ball_tree, kd_tree, brute |
+</AlgoCard>
+
+<AlgoCard n="11" title="Real-world applications">
+<AppGrid items={[
+  {icon: '🎬', label: 'Recommendation Systems'},
+  {icon: '🖼', label: 'Image Recognition'},
+  {icon: '➕', label: 'Medical Diagnosis'},
+  {icon: '👥', label: 'Customer Segmentation'},
+  {icon: '✍', label: 'Handwriting Detection'},
+  {icon: '📊', label: 'Pattern Recognition'},
+]} />
+</AlgoCard>
+</AlgoGrid>
+

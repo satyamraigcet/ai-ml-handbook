@@ -1,0 +1,147 @@
+---
+title: Logistic Regression
+sidebar_label: Logistic Regression
+hide_title: true
+hide_table_of_contents: true
+slug: /algorithms/logistic
+---
+
+<ChapterHero icon="⇄" title="Logistic Regression">
+<PlainWords>
+Same straight-line maths as linear regression, but squeezed through an <Highlight>S-shaped curve</Highlight> so the answer becomes a probability between 0 and 1. Above 0.5 → class 1, below → class 0.
+</PlainWords>
+</ChapterHero>
+Logistic Regression is a <Highlight>supervised</Highlight> machine learning algorithm used for <Highlight>classification</Highlight> problems.
+
+<AlgoGrid>
+<AlgoCard n="1" title="Definition">
+Logistic Regression is a <Highlight>supervised</Highlight> machine learning algorithm used for classification problems.
+
+It predicts the <Highlight>probability</Highlight> that an input belongs to a particular class.
+
+It uses the <Highlight>Sigmoid Function</Highlight> to output values between 0 and 1.
+</AlgoCard>
+
+<AlgoCard n="2" title="Mathematical equation">
+**Linear Combination**
+
+`z = w₁x₁ + w₂x₂ + … + wₙxₙ + b`
+
+**Sigmoid Function**
+
+`σ(z) = 1 / (1 + e⁻ᶻ)`
+
+**Final Prediction**
+
+`ŷ = 1 if σ(z) ≥ 0.5 ; 0 if σ(z) < 0.5`
+
+**Where,**
+- `z` = linear combination
+- `σ(z)` = probability
+- `w` = weights
+- `b` = bias / intercept
+</AlgoCard>
+
+<AlgoCard n="3" title="Geometrical interpretation">
+- Logistic Regression creates a **decision boundary**.
+- In 2D → a straight line separating classes.
+- In 3D → a plane.
+- Uses sigmoid curve to map outputs into probabilities.
+</AlgoCard>
+
+<AlgoCard n="4" title="Geometrical interpretation (diagram)" span="2">
+<PlotLogistic />
+</AlgoCard>
+
+<AlgoCard n="5" title="When to use">
+- Output is categorical
+- Binary or multinomial classification
+- Need probability scores
+- Log-odds are approximately linear in the features
+
+**Examples:**
+- Email spam detection
+- Disease prediction
+- Customer churn prediction
+- Fraud detection
+</AlgoCard>
+
+<AlgoCard n="6" title="Code implementation (Python · scikit-learn)" span="wide">
+```python
+# Import libraries
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# Sample Data
+X = [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12]]
+y = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+# Split data into training & testing set
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y)
+
+# Model (create model)
+model = LogisticRegression()
+
+# Train (train the model)
+model.fit(X_train, y_train)
+
+# Prediction (predict on test data)
+y_pred = model.predict(X_test)
+
+# Accuracy (model accuracy)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+# Probability of class [0, 1] for input 5.5
+print(model.predict_proba([[5.5]]))
+```
+</AlgoCard>
+
+<AlgoCard n="7" title="Assumptions">
+- Binary outcome variable
+- Independent observations
+- No multicollinearity
+- Linear relationship between log-odds and features
+- Large sample size preferred
+</AlgoCard>
+
+<AlgoCard n="8" title="Advantages">
+- ✓ Simple and fast
+- ✓ Probability output
+- ✓ Easy to interpret
+- ✓ Works well for many binary tasks
+- ✓ Regularization can control overfitting
+</AlgoCard>
+
+<AlgoCard n="9" title="Disadvantages">
+- ✗ Cannot solve complex non-linear problems
+- ✗ Sensitive to outliers
+- ✗ Requires feature engineering sometimes
+- ✗ Assumes linear decision boundary
+</AlgoCard>
+
+<AlgoCard n="10" title="Hyperparameters" span="2">
+Important hyperparameters in sklearn:
+
+| Hyperparameter | Meaning |
+| --- | --- |
+| `penalty` | regularization type (l1, l2) |
+| `C` | regularization strength |
+| `solver` | optimization algorithm |
+| `max_iter` | maximum iterations |
+| `class_weight` | handle imbalanced data |
+</AlgoCard>
+
+<AlgoCard n="11" title="Real-world applications">
+<AppGrid items={[
+  {icon: '✉', label: 'Spam Email Detection'},
+  {icon: '🩺', label: 'Disease Diagnosis'},
+  {icon: '💳', label: 'Credit Card Fraud Detection'},
+  {icon: '👥', label: 'Customer Churn Prediction'},
+  {icon: '🛒', label: 'Product Recommendation'},
+  {icon: '🛡', label: 'Cybersecurity Threat Detection'},
+]} />
+</AlgoCard>
+</AlgoGrid>
+

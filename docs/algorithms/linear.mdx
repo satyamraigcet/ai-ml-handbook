@@ -1,0 +1,128 @@
+---
+title: Linear Regression
+sidebar_label: Linear Regression
+hide_title: true
+hide_table_of_contents: true
+slug: /algorithms/linear
+description: Algorithm sheet — Linear Regression
+---
+
+<ChapterHero icon="📈" title="Linear Regression">
+<PlainWords>
+Draw the <Highlight>straight line</Highlight> that passes as close as possible to every dot, then read new answers off that line. More experience → more salary? A line can tell you how much more.
+</PlainWords>
+</ChapterHero>
+<AlgoGrid>
+<AlgoCard n="1" title="Definition">
+Linear Regression is a <Highlight>supervised learning</Highlight> algorithm used to model the relationship between a **dependent variable (target)** and one or more **independent variables (features)** using a <Highlight>straight line</Highlight>.
+</AlgoCard>
+
+<AlgoCard n="2" title="Mathematical equation">
+For one variable (simple linear regression):
+
+`y = mx + b`
+
+For multiple variables (multiple linear regression):
+
+`y = w₁x₁ + w₂x₂ + … + wₙxₙ + b`
+
+**Where,**
+- `y` = predicted output
+- `xᵢ` = input features
+- `wᵢ` = weights (coefficients)
+- `b` = bias (intercept)
+</AlgoCard>
+
+<AlgoCard n="3" title="Geometrical interpretation">
+- In **2D:** it is a best-fit straight line.
+- In **3D:** it becomes a plane.
+- In **higher dimensions:** it becomes a hyperplane.
+
+The algorithm tries to minimize the vertical distance between data points and the line (error).
+</AlgoCard>
+
+<AlgoCard n="4" title="Geometrical interpretation (diagram)" span="2">
+<PlotLinear />
+</AlgoCard>
+
+<AlgoCard n="5" title="When to use">
+- When output is continuous (numeric).
+- When relationship between variables is approximately linear.
+- For forecasting and trend analysis.
+
+**Examples:**
+- House price prediction
+- Salary prediction
+- Sales forecasting
+</AlgoCard>
+
+<AlgoCard n="6" title="Code implementation (Python · scikit-learn)" span="wide">
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+
+# Sample teaching data
+X = [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12]]
+y = [2.0, 4.1, 5.7, 8.3, 9.8, 12.2, 14.1, 15.9, 18.4, 19.7, 22.1, 24.3]
+
+# Split data (training and testing split)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42)
+
+# Model (create model and train)
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Prediction (predict on test data)
+y_pred = model.predict(X_test)
+
+# Evaluation (evaluate the model)
+print("MSE:", mean_squared_error(y_test, y_pred))
+print("Slope:", model.coef_)
+print("Intercept:", model.intercept_)
+```
+</AlgoCard>
+
+<AlgoCard n="7" title="Assumptions">
+1. The conditional mean of y is approximately linear in the features.
+2. No perfect multicollinearity.
+3. Independent errors or an explicitly modeled dependence structure.
+4. Constant error variance is needed for standard OLS uncertainty estimates.
+</AlgoCard>
+
+<AlgoCard n="8" title="Advantages">
+- ✓ Simple and easy to implement
+- ✓ Fast training
+- ✓ Interpretable coefficients
+- ✓ Works well when the target relationship is approximately linear
+</AlgoCard>
+
+<AlgoCard n="9" title="Disadvantages">
+- ✗ Poor performance on non-linear data
+- ✗ Sensitive to outliers
+- ✗ Assumes linear relationship (often unrealistic)
+- ✗ Can underfit complex datasets
+</AlgoCard>
+
+<AlgoCard n="10" title="Hyperparameters" span="2">
+`LinearRegression` has few tuning knobs. Use Ridge, Lasso or Elastic Net when regularization is needed.
+
+| Hyperparameter | Meaning |
+| --- | --- |
+| `fit_intercept` | whether to estimate an intercept |
+| `positive` | constrain coefficients to be non-negative |
+</AlgoCard>
+
+<AlgoCard n="11" title="Real-world applications">
+<AppGrid items={[
+  {icon: '📈', label: 'Trend estimation (not guaranteed market returns)'},
+  {icon: '🏠', label: 'Real estate price estimation'},
+  {icon: '💰', label: 'Salary analysis based on experience'},
+  {icon: '📊', label: 'Demand forecasting'},
+  {icon: '⛽', label: 'Fuel consumption estimation'},
+  {icon: '🌱', label: 'Agriculture yield estimation'},
+]} />
+</AlgoCard>
+</AlgoGrid>
+

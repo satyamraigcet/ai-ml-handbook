@@ -1,0 +1,154 @@
+---
+title: LlamaIndex
+sidebar_label: LlamaIndex
+sidebar_position: 12.5
+slug: /parts/part-4/llamaindex
+description: LlamaIndex — connect documents to a language model with indexes, retrieval, and a short worked example.
+---
+
+**In plain words:** LlamaIndex is a framework for <Highlight>connecting documents to a language model</Highlight>. It loads sources, splits them into nodes, builds an index, retrieves the relevant pieces at question time, and asks the model to write from those pieces.
+
+> The model writes. LlamaIndex keeps the library searchable.
+
+<LoopStrip
+  title="THE ROUTE"
+  steps={[
+    { label: 'Documents', sub: 'your files' },
+    { label: 'Load', sub: 'readers' },
+    { label: 'Chunk', sub: 'nodes' },
+    { label: 'Index', sub: 'vectors' },
+    { label: 'Retrieve', sub: 'top matches' },
+    { label: 'LLM', sub: 'synthesize' },
+  ]}
+/>
+
+<LlamaIndexPipeline />
+
+It is one practical way to build the RAG pipeline from Chapter 12. A framework reduces wiring. It does **not** remove the need to evaluate retrieval, permissions, citations, latency, and cost. **A polished answer cannot repair <Highlight>missing retrieval</Highlight>.**
+
+### What LlamaIndex is for
+
+| Piece | Job |
+| --- | --- |
+| Data connectors / readers | Pull text from PDFs, folders, Notion, databases, APIs, and more. |
+| Nodes | Chunks of text plus metadata (source file, page, section). |
+| Indexes | Structures for search — most often a <Highlight>vector index</Highlight> over embeddings. |
+| Retrievers | Given a question, return the most relevant nodes. |
+| Query / chat engines | Retrieve nodes, pack them into a prompt, call the LLM, return an answer (often with sources). |
+| Agents / workflows | Optional next step: let the model choose tools or multi-step retrieval when one search is not enough. |
+
+**Simple flow · a straight RAG line:** `Folder of PDFs → load → chunk into nodes → embed → VectorStoreIndex → ask a question → retrieve → synthesize answer`
+
+Use provider and database SDKs directly when the flow is small and explicit. Frameworks such as **LangChain, LlamaIndex, Haystack, and RAGflow** provide connectors and pipeline pieces. Pick the one that matches the problem: LlamaIndex leans hard on <Highlight>document indexing and retrieval</Highlight>; LangChain leans hard on composing models, tools, and workflows.
+
+<LlamaIndexVsLangChain />
+
+| | LlamaIndex | LangChain |
+| --- | --- | --- |
+| Default job | Turn private documents into a queryable index for RAG. | Compose models, prompts, tools, memory, and chains. |
+| Mental model | Data in → index → question out. | Ports and pipelines for an LLM app. |
+| Best fit | Knowledge assistants over PDFs, wikis, tickets, notes. | Agents, multi-tool apps, broader orchestration. |
+| Overlap | Both can do RAG. Both talk to the same model APIs and vector stores. | You can use pieces from either — or neither — and still build RAG by hand. |
+
+### Worked example · leave policy Q&A
+
+Imagine a folder `policies/` with `leave_policy.pdf`. Someone asks: **“How many leave days do I get?”** LlamaIndex’s job is to find the sentence on page 3 and make the model write from that sentence.
+
+<LlamaIndexExampleFlow />
+
+```python
+# pip install llama-index
+from llama_index.core import (
+    SimpleDirectoryReader,
+    VectorStoreIndex,
+    Settings,
+)
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+
+Settings.llm = OpenAI(model="gpt-4o-mini")
+Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
+
+# 1) Load documents from a folder
+documents = SimpleDirectoryReader("policies").load_data()
+
+# 2) Build a vector index (chunk + embed + store)
+index = VectorStoreIndex.from_documents(documents)
+
+# 3) Ask a question — retrieve nodes, then synthesize
+query_engine = index.as_query_engine(similarity_top_k=3)
+response = query_engine.query("How many leave days do I get?")
+
+print(response)
+# → e.g. "You get 12 days of leave per year (Policy v4, page 3)."
+```
+
+What happens under the hood:
+
+1. **Load** — the PDF becomes one or more `Document` objects.
+2. **Chunk** — text is split into **nodes** (short passages with metadata).
+3. **Embed** — each node becomes a vector of numbers that stand for meaning.
+4. **Index** — vectors sit in a store the query engine can search.
+5. **Retrieve** — the question is embedded; the nearest nodes win (for example the leave-days paragraph).
+6. **Synthesize** — those nodes are placed in the prompt; the LLM writes the answer from them.
+
+```text
+Question: How many leave days do I get?
+Retrieved node (policy v4, p.3): "Employees receive 12 days of leave per year."
+Augmented prompt: answer using only the notes below → …
+Answer: 12 days a year, citing Policy v4, page 3.
+```
+
+Without the retrieved node, the model would only guess from training. With the node, the answer is grounded in your file.
+
+### Same index · multi-turn chat
+
+For a follow-up conversation over the same library, use a chat engine instead of a one-shot query engine.
+
+```python
+# Reuse the index from above
+chat_engine = index.as_chat_engine(similarity_top_k=3)
+
+r1 = chat_engine.chat("How many leave days do I get?")
+print(r1)  # → grounded answer from the policy
+
+r2 = chat_engine.chat("Is that calendar days or working days?")
+print(r2)  # → follows up using chat memory + another retrieval
+```
+
+### Indexes you will hear about
+
+| Index idea | When it helps |
+| --- | --- |
+| **Vector store index** | Default for semantic search — “find passages that mean the same thing as this question.” |
+| **Summary index** | Roll up long documents when the question needs a broad overview. |
+| **Keyword / BM25-style search** | Exact names, IDs, error codes — letters matter more than synonyms. |
+| **Hybrid** | Combine keyword + vector when both exact match and meaning matter. |
+
+Start with a vector index. Add keyword or hybrid search when product names, ticket IDs, or legal phrases must match exactly.
+
+### Habits that keep LlamaIndex honest
+
+- Evaluate **retrieval** separately from the final answer — wrong nodes cannot be fixed by a nicer prompt.
+- Keep **citations** (file, page, section) so a human can check the source.
+- Refresh the index when documents change — a stale store answers yesterday’s policy.
+- Respect **permissions** — do not retrieve a page the user is not allowed to see.
+- Measure latency and cost of embedding + search + generation; frameworks do not make those free.
+
+<QAItem q="When should I use LlamaIndex instead of calling the vector database myself?">
+Use LlamaIndex when you want loaders, chunking, indexes, and a query engine without wiring every step. Call SDKs directly when the pipeline is tiny, you need full control, or the framework’s defaults fight your product constraints.
+</QAItem>
+
+<QAItem q="Is LlamaIndex the same thing as RAG?">
+No. RAG is the pattern: retrieve passages, put them in the prompt, then generate. LlamaIndex is one toolkit that implements that pattern (and related patterns) for you.
+</QAItem>
+
+<QAItem q="What is a “node” in LlamaIndex?">
+A node is a chunk of content plus metadata — the unit the index stores and the retriever returns. Good chunking keeps a fact and its conditions together so retrieval does not split them.
+</QAItem>
+
+<QAItem q="Can LlamaIndex replace LangChain?">
+Not as a 1:1 swap. Prefer LlamaIndex when the centre of gravity is documents and retrieval. Prefer LangChain (and LangGraph) when the centre is agents, tools, and multi-step workflows. Many teams use one, both, or neither.
+</QAItem>
+
+**In one line:** LlamaIndex turns your documents into a searchable index so the model can <Highlight>look up the right passage</Highlight>, then write.

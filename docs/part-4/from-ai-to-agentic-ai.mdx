@@ -1,0 +1,141 @@
+---
+title: "From AI to Agentic AI"
+sidebar_label: "Map · AI → Agentic"
+hide_title: true
+slug: "/parts/part-4/from-ai-to-agentic-ai"
+description: "Concept flow — 12 steps from rule books to the agentic loop"
+---
+
+<ChapterHero title="From AI to Agentic AI" kicker="Concept flow · 12 steps">
+<p>A map from rule books to the agentic loop. Deep chapters for each idea live nearby — this page is the journey, not a second copy of them.</p>
+</ChapterHero>
+
+<PlainWords>
+start with rules or patterns, <Highlight>learn from data</Highlight>, stack layers, talk in language, then wrap tools and a loop so the model <Highlight>can act</Highlight>.
+</PlainWords>
+
+<LoopStrip
+  title="THE ROUTE"
+  steps={[
+    { label: 'AI', sub: 'umbrella' },
+    { label: 'ML', sub: 'from data' },
+    { label: 'DL', sub: 'many layers' },
+    { label: 'LLM', sub: 'language' },
+    { label: 'Agentic AI', sub: 'acts' },
+    { label: 'Harness', sub: 'wrapper' },
+  ]}
+/>
+
+<NoteBar>
+Chapters 01, 11 and 14 go deeper on foundations, GenAI/LLMs, and agents. Here you only get the 12-step spine.
+</NoteBar>
+
+<AlgoGrid>
+
+<AlgoCard n="1" title="AI splits into two approaches" span="2">
+Two ways to build a smart system.
+
+| Path | Idea |
+| --- | --- |
+| **Pattern recognition** | <Highlight>Learns patterns from examples</Highlight> (Machine Learning). |
+| **Rule-based AI = Symbolic AI** | <Highlight>Humans write the rules</Highlight>. |
+
+<PlotTwoApproaches />
+</AlgoCard>
+
+<AlgoCard n="2" title="Symbolic AI is a rulebook" span="wide">
+Every rule is written by hand, as If / Else. No data needed — and it can never learn on its own.
+
+```python
+# rule-based AI
+if account.is_verified:
+    show_blue_check = True
+else:
+    show_blue_check = False
+```
+
+<PlotRulebook />
+</AlgoCard>
+
+<AlgoCard n="3" title="AI contains ML, ML contains DL" span="2">
+Nested fields, not rivals: **AI ⊃ ML ⊃ DL**. Deep Learning = <Highlight>multi-layer neural networks</Highlight>.
+
+<PlotNest />
+</AlgoCard>
+
+<AlgoCard n="4" title="ML removes the rulebook" span="2">
+**Before:** a human rulebook. **Now:** data → Machine Learning → learned rules (the model). The machine learns the rules from data instead of waiting for a person to write them.
+
+<PlotDataNotRules />
+</AlgoCard>
+
+<AlgoCard n="5" title="Deep Learning = many layers" span="2">
+Input → Layer 1 → Layer 2 → Layer 3 → Output. Layered networks built for images are called **CNNs**.
+
+<PlotLayers />
+</AlgoCard>
+
+<AlgoCard n="6" title="What goes into an LLM" span="2">
+**Deep Learning + NLP + internet-scale data → LLM.** CNN is another branch of deep networks, built for images instead of language.
+
+<PlotIntoLlm />
+</AlgoCard>
+
+<AlgoCard n="7" title="How an LLM answers you" span="wide">
+Text prompt → **Encoder** (text to numbers) → numeric vector → **LLM** → **Decoder** (numbers to text) → plain text output.
+
+<PlotLlmAnswer />
+</AlgoCard>
+
+<AlgoCard n="8" title="LLM splits into two paths" span="2">
+| Path | What it does |
+| --- | --- |
+| **Gen AI** | Generates content from a prompt. |
+| **Agentic AI** | Takes actions to reach a goal, using tools, skills and sub-agents. |
+
+<PlotTwoPaths />
+</AlgoCard>
+
+<AlgoCard n="9" title="Agentic AI has 4 parts" span="wide">
+All four flow into one wrapper: the **harness**.
+
+| Part | Role |
+| --- | --- |
+| **Skills** | Reusable know-how |
+| **Sub-agent** | Helper agents |
+| **Tool call** | Runs real actions |
+| **Content** | Context for the model |
+
+<PlotFourParts />
+</AlgoCard>
+
+<AlgoCard n="10" title="The Harness wraps it all" span="2">
+**Examples:** Claude Code · opencode · Codex · Pi.
+
+**Features:** slash commands · content management · sub-agent · skills.
+
+<PlotHarness />
+</AlgoCard>
+
+<AlgoCard n="11" title="The agentic loop" span="wide">
+Input → **think → act (tool call) → observe** → repeat until done → Output.
+
+For the full loop, tools, stop rules and safety, see [Chapter 14 · Agents](/docs/parts/part-4/14-ai-agents-a-model-that-can-take-a-next-step).
+
+<PlotAgenticLoop />
+</AlgoCard>
+
+<AlgoCard n="12" title="Recap · the full picture" span="wide">
+| Step | One line |
+| --- | --- |
+| **AI** | The umbrella: rules or pattern recognition |
+| **ML** | Learns the rules from data |
+| **DL** | Neural networks with many layers |
+| **LLM** | Deep learning + NLP + internet-scale data |
+| **Agentic AI** | LLM with skills, sub-agents, tools, content |
+| **Harness** | The wrapper product: Claude Code, Codex, Pi, … |
+
+<PlotRecap />
+</AlgoCard>
+
+</AlgoGrid>

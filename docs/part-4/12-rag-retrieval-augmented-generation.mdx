@@ -1,0 +1,189 @@
+---
+title: "Chapter 12 · RAG — Retrieval-Augmented Generation"
+sidebar_label: "12 · RAG"
+sidebar_position: 12
+hide_title: true
+slug: "/parts/part-4/12-rag-retrieval-augmented-generation"
+description: "RAG — look it up, then write. Pictures of the pipeline, similarity, and the augmented prompt."
+---
+
+<ChapterHero n="12" title="RAG" kicker="Look it up, then write">
+<p>
+  The model writes. The facts get pulled at question time.{' '}
+  <Highlight>The model stays the same. The library can change tomorrow.</Highlight>
+</p>
+<PlainWords label="In plain words">
+  if you ask a question and the robot has no book, it guesses from what it remembers. RAG means it
+  <Highlight>opens the right page first</Highlight>, then writes the answer from that page.
+</PlainWords>
+</ChapterHero>
+
+<RagGuessVsLookup />
+
+### Question only vs RAG
+
+| Question only — a guess | RAG — look it up, then write |
+| --- | --- |
+| "how many leaves?" → LLM guesses from training | Question + retrieved page 3 → "12 days a year. Policy v4, page 3." |
+| The model uses patterns it learned earlier. Your private policy, today's price list, and last week's notes were never in that training. | Search finds the relevant passage first. That passage is placed in the prompt. The model writes from what it was just shown. |
+
+<RagTwoPaths />
+
+### The name is the pipeline
+
+<RagLetters />
+
+**Answer one question, every time:** Embed the question → Retrieve the passages that match → **Augment**: put those passages into the prompt → **Generate**: the LLM writes the answer from that prompt.
+
+<RagIndexPipeline />
+
+<RagQueryPipeline />
+
+### The augmented prompt (the pattern that makes it honest)
+
+<pre className="nb-rag-prompt">{`Answer only from the notes.
+If the notes do not say, say so.
+Notes:
+[1] Casual leave: 12 days a year. Policy v4, page 3.
+Question: How many casual leaves?
+Answer: 12 days a year. [Policy v4, page 3]`}</pre>
+
+### Glossary — the parts of a RAG system
+
+<div className="nb-rag-parts">
+  <div className="nb-rag-part">
+    <h3>Chunk</h3>
+    <p>A short piece of a document — often a paragraph with a small overlap. A whole book will not fit; a single sentence often loses the rule.</p>
+  </div>
+  <div className="nb-rag-part">
+    <h3>Embedding model</h3>
+    <p>A separate model from the writer LLM. It maps a chunk — and later the question — into the same list of numbers.</p>
+  </div>
+  <div className="nb-rag-part">
+    <h3>Vector store</h3>
+    <p>Keeps each chunk beside its numbers and returns the nearest ones quickly. Text goes into the prompt; numbers are only for search.</p>
+  </div>
+  <div className="nb-rag-part">
+    <h3>Retriever</h3>
+    <p>Embeds the question, asks the store for top matches, and can filter by source, date, or permission.</p>
+  </div>
+  <div className="nb-rag-part">
+    <h3>Context window</h3>
+    <p>How much text the LLM can read at once. RAG picks a few useful chunks so they fit.</p>
+  </div>
+  <div className="nb-rag-part">
+    <h3>Citation</h3>
+    <p>The answer names the chunk it used. A reader can open page 3 and check the sentence.</p>
+  </div>
+</div>
+
+### Similarity — why the right page wins
+
+An embedding turns text into a list of numbers. Close numbers mean close meaning. Search returns the nearest chunks, often scored with **cosine similarity**.
+
+<RagSimilaritySpace />
+
+### Keyword search vs semantic search
+
+Retrieval has to find the page before the model can read it. Two searches look at the question differently.
+
+<RagSearchKinds />
+
+| Keyword (lexical — the letters) | Semantic (vector — the meaning) |
+| --- | --- |
+| Matches the words you typed, or a close variant. | An embedding model turns the question and each chunk into a list of numbers. |
+| An **inverted index** lists, for each word, the documents that contain it. | Search returns the chunks whose numbers point the same way. Cosine similarity is the usual score. |
+| A ranker such as **BM25** prefers pages where those words are rare and prominent. | The words can differ; the idea still matches. |
+| Ask for "car" and you get pages that say "car". A page that only says "automobile" can be missed. | "Reduce electricity bills" can match "tips to lower power consumption". |
+
+<RagCosineSketch />
+
+**Cosine similarity in numbers (teaching sketch — three numbers, not a real embedding):**
+
+```
+cosine(A, B) = (A · B) / (‖A‖ ‖B‖)
+
+"reduce electricity bills"        [0.12, 0.34, 0.56]
+"tips to lower power consumption" [0.11, 0.32, 0.59]  → cosine ≈ 1.0 → retrieve this chunk
+"today's cafeteria menu"          [0.90, 0.10, 0.05]  → cosine ≈ 0.3 → leave it out
+```
+
+Close meaning scores near 1; unrelated text scores nearer 0. Cosine ignores length; it asks how alike two directions are. A real embedding is hundreds or thousands of numbers long. **Embed both sides in the same space, keep the nearest chunks, and put their text in the prompt.** Many production searches use both methods, so an exact term and a paraphrased idea can both be found.
+
+### Embeddings, stores, and how you build it
+
+<RagBuildStrip />
+
+Uses of embeddings: semantic search and question answering · classification and clustering · recommendation · anomaly detection and duplicate discovery.
+
+Choices: hosted embedding APIs (OpenAI, Google, Cohere) or open options (Sentence-Transformers, Hugging Face models, Jina AI). Compare retrieval quality, dimensions, speed, languages, maximum input, licence, and cost. **Use the same compatible model for stored items and queries — changing it usually means re-indexing.**
+
+| Category | Examples | Notes |
+| --- | --- | --- |
+| Libraries / local | FAISS, Chroma, LanceDB | Good for experiments or embedded use; you run persistence and scaling yourself. |
+| Vector-native services | Pinecone, Weaviate, Qdrant | Indexing, filtering, operations, and scaling are product features. |
+| Existing data platforms | Supabase/Postgres, MongoDB Atlas | Keep vectors near relational or document data and use metadata filters. |
+
+**The indexing workflow:** 1) Choose the unit to index — passage, product, image, or record. 2) Clean and chunk it; attach source, date, owner, and permission metadata. 3) Create embeddings and store vectors with their original records. 4) Embed the query, filter authorised candidates, run similarity search. 5) Re-rank, inspect retrieval metrics, and return citations with the result.
+
+### Failure modes — when RAG gives a wrong answer
+
+<RagFailures />
+
+- **Wrong chunk.** The question was vague, the split cut the rule in half, or a similar but unrelated page ranked higher.
+- **Split fact.** The number is in one chunk and the condition ("after one year of service") is in the next. Neither match is complete alone.
+- **Stale index.** The PDF was updated and the vector store still holds yesterday's chunks.
+- **Ignored notes.** The right chunk was in the prompt and the model still answered from habit. The instruction has to require the notes, and the trace should show them.
+
+### Advanced RAG techniques (when plain retrieve-once is not enough)
+
+Basic RAG: one query → top-k chunks → generate. Production systems often add a second pass so the *right* context reaches the prompt.
+
+| Technique | What it does |
+| --- | --- |
+| Query transformation | Rewrite, expand, or split the question before search. |
+| Multi-query | Several phrasings; merge the hit lists. |
+| Hybrid search | Vector similarity **plus** keyword (e.g. BM25) so exact IDs and paraphrases both rank. |
+| Re-ranking | A stronger model re-orders the first-pass chunks. |
+| Context compression | Keep only the sentences that matter so the window stays small. |
+| Parent–child chunking | Retrieve a small child span; paste the larger parent for context. |
+| Graph / router RAG | Follow entity links, or send the question to the best index. |
+
+**Self-RAG / adaptive RAG** let the model critique retrieval or pick a strategy per question — still cap retries. Measure retrieval (was the right page in the top-k?) separately from generation quality.
+
+### Agentic RAG
+
+<RagAgenticLoop />
+
+A plain RAG pipeline searches once and answers. An agent can read the chunks, notice a gap, rewrite the query, and search again before it writes. The stop rule still matters: a fixed number of searches, then an answer or a clear "the notes do not say".
+
+### Ways to build it
+
+Use provider and database SDKs directly when the flow is small and explicit. Frameworks such as **LangChain, LlamaIndex, Haystack, and RAGflow** provide connectors and pipeline pieces. A framework reduces wiring, not the need to evaluate retrieval, permissions, citations, latency, and cost. Test each stage separately — **a polished answer cannot repair missing retrieval.**
+
+**RAG vs fine-tuning:** retrieve changing knowledge; fine-tune repeated behaviour or a specialised skill. They can be combined. RAG is useful when answers need current, private, or traceable facts — policy assistants, knowledge search, support, research, grounded summarisation.
+
+### LlamaIndex
+
+**In plain words:** LlamaIndex is a framework for connecting documents to a language model. It loads sources, splits them into nodes, builds an index, retrieves the relevant pieces, and passes those pieces to the model.
+
+<LoopStrip steps={['Documents', 'Load', 'Chunk', 'Index', 'Retrieve', 'LLM']} />
+
+<LlamaIndexPipeline />
+
+The dedicated **LlamaIndex** notes page adds the piece table, a leave-policy Python example, index types, and how LlamaIndex compares with LangChain.
+
+### Forward deployer (the job this created)
+
+Companies advertise this job as **Forward Deployed Engineer**. The work: take a model that works on sample data and make it work inside someone else's real job.
+
+<RagForwardDeployer />
+
+- Learns the job the team actually does, including the boring exceptions.
+- Connects the model to their documents, tools, and permissions.
+- Puts a small version in front of real users and watches traces, evaluations, and whether the work got better.
+- Carries the gaps back: a missing tool, a bad prompt, a rule the demo never saw.
+
+**Where the title came from:** Palantir made the name a standard job — embed with the customer, ship the workflow, send the lesson back to the product. AI companies copied it once a strong model still failed on private data and unwritten rules.
+
+**In one line (chapter):** Generative AI creates content. Autoregressive LLMs write by predicting tokens. **RAG writes from passages retrieved at question time**, by keyword or by meaning. A chain is a straight workflow; a graph adds state, branches, and loops. MCP is the standard door to tools and data. A forward deployer connects the system to real work and real feedback.
